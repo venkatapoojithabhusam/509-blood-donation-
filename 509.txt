@@ -1,175 +1,91 @@
 #include <stdio.h>
 #include <string.h>
 
-// Structure to represent a blood group record
-struct BloodGroup {
-    char bloodType[5]; // Blood type (e.g., A+, O-)
-    int availableUnits; // Available units
-    int totalDonated;   // Total units donated
+struct Donor {
+    char name[50];    
+    int age;          
+    float weight;     
+    char bloodGroup[5]; 
+    int unitsDonated; 
 };
 
-// Function to validate blood type format
-int isValidBloodType(const char *bloodType) {
-    const char *validTypes[] = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
-    for (int i = 0; i < 8; i++) {
-        if (strcmp(bloodType, validTypes[i]) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
+void addDonor(struct Donor *donors, int *count) {
+    struct Donor newDonor;
 
-// Function to add a blood group or update units
-void addBloodGroup(struct BloodGroup *inventory, int *count) {
-    char bloodType[5];
-    int units;
+    printf("Enter donor name: ");
+    scanf("%s", newDonor.name);
 
-    printf("Enter blood type (e.g., A+, O-): ");
-    scanf("%4s", bloodType);
-
-    if (!isValidBloodType(bloodType)) {
-        printf("Invalid blood type. Please enter a valid blood type (e.g., A+, O-).\n");
+    printf("Enter age: ");
+    scanf("%d", &newDonor.age);
+    if (newDonor.age <= 20) {
+        printf("Donor must be older than 20 years.\n");
         return;
     }
 
-    printf("Enter the number of units to add: ");
-    scanf("%d", &units);
-
-    if (units <= 0) {
-        printf("Invalid number of units. Please enter a positive value.\n");
+    printf("Enter weight (kg): ");
+    scanf("%f", &newDonor.weight);
+    if (newDonor.weight < 50) {
+        printf("Donor must weigh at least 50 kg.\n");
         return;
     }
 
-    // Check if the blood type already exists
-    for (int i = 0; i < *count; i++) {
-        if (strcmp(inventory[i].bloodType, bloodType) == 0) {
-            inventory[i].availableUnits += units;
-            inventory[i].totalDonated += units;
-            printf("Updated blood type %s with %d units.\n", bloodType, units);
-            return;
-        }
+    printf("Enter blood group (e.g., A+, O-): ");
+    scanf("%4s", newDonor.bloodGroup);
+
+    printf("Enter number of units donated: ");
+    scanf("%d", &newDonor.unitsDonated);
+
+    if (newDonor.unitsDonated <= 0) {
+        printf("Units donated must be a positive value.\n");
+        return;
     }
 
-    // Add a new blood type
-    strcpy(inventory[*count].bloodType, bloodType);
-    inventory[*count].availableUnits = units;
-    inventory[*count].totalDonated = units;
+    donors[*count] = newDonor;
     (*count)++;
-    printf("Added new blood type %s with %d units.\n", bloodType, units);
+    printf("Donor %s added successfully!\n", newDonor.name);
 }
 
-// Function to display all blood groups in the inventory
-void displayInventory(struct BloodGroup *inventory, int count) {
+void displayDonors(struct Donor *donors, int count) {
     if (count == 0) {
-        printf("No blood group data available.\n");
+        printf("No donor data available.\n");
         return;
     }
 
-    printf("\nBlood Group Inventory:\n");
-    printf("Blood Type\tAvailable Units\tTotal Donated\n");
-    printf("-------------------------------------------------\n");
-    for (int i = 0; i < count; i++) {
-        printf("%-10s\t        %d\t\t         %d\n", inventory[i].bloodType, inventory[i].availableUnits, inventory[i].totalDonated);
-    }
-}
-
-// Function to issue blood units
-void issueBlood(struct BloodGroup *inventory, int count) {
-    char bloodType[5];
-    int units;
-
-    printf("Enter blood type to issue (e.g., A+, O-): ");
-    scanf("%4s", bloodType);
-
-    if (!isValidBloodType(bloodType)) {
-        printf("Invalid blood type. Please enter a valid blood type (e.g., A+, O-).\n");
-        return;
-    }
-
-    printf("Enter the number of units to issue: ");
-    scanf("%d", &units);
-
-    if (units <= 0) {
-        printf("Invalid number of units. Please enter a positive value.\n");
-        return;
-    }
+    printf("\nDonor List:\n");
+    printf("Name\t\tAge\tWeight\tBlood Group\tUnits Donated\n");
+    printf("-----------------------------------------------------------\n");
 
     for (int i = 0; i < count; i++) {
-        if (strcmp(inventory[i].bloodType, bloodType) == 0) {
-            if (inventory[i].availableUnits >= units) {
-                inventory[i].availableUnits -= units;
-                printf("Successfully issued %d units of blood type %s.\n", units, bloodType);
-            } else {
-                printf("Insufficient units available for blood type %s.\n", bloodType);
-            }
-            return;
-        }
+        printf("%-10s\t%d\t%.1f\t%-10s\t%d\n",
+               donors[i].name,
+               donors[i].age,
+               donors[i].weight,
+               donors[i].bloodGroup,
+               donors[i].unitsDonated);
     }
-
-    printf("Blood type %s not found in inventory.\n", bloodType);
-}
-
-// Function to return unused blood units
-void returnBlood(struct BloodGroup *inventory, int count) {
-    char bloodType[5];
-    int units;
-
-    printf("Enter blood type to return (e.g., A+, O-): ");
-    scanf("%4s", bloodType);
-
-    if (!isValidBloodType(bloodType)) {
-        printf("Invalid blood type. Please enter a valid blood type (e.g., A+, O-).\n");
-        return;
-    }
-
-    printf("Enter the number of units to return: ");
-    scanf("%d", &units);
-
-    if (units <= 0) {
-        printf("Invalid number of units. Please enter a positive value.\n");
-        return;
-    }
-
-    for (int i = 0; i < count; i++) {
-        if (strcmp(inventory[i].bloodType, bloodType) == 0) {
-            inventory[i].availableUnits += units;
-            printf("Successfully returned %d units of blood type %s.\n", units, bloodType);
-            return;
-        }
-    }
-
-    printf("Blood type %s not found in inventory.\n", bloodType);
 }
 
 int main() {
-    struct BloodGroup inventory[100]; // Array to store blood group data
-    int count = 0; // Keep track of the number of blood groups in inventory
+    struct Donor donors[100]; 
+    int count = 0;            
     int choice;
 
     while (1) {
-        printf("\nBlood Donation and Inventory System\n");
-        printf("1. Add Blood Group/Units\n");
-        printf("2. Display Inventory\n");
-        printf("3. Issue Blood Units\n");
-        printf("4. Return Unused Blood Units\n");
-        printf("5. Exit\n");
+        printf("\nBlood Donation Management System\n");
+        printf("1. Add Donor\n");
+        printf("2. Display Donors\n");
+        printf("3. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                addBloodGroup(inventory, &count);
+                addDonor(donors, &count);
                 break;
             case 2:
-                displayInventory(inventory, count);
+                displayDonors(donors, count);
                 break;
             case 3:
-                issueBlood(inventory, count);
-                break;
-            case 4:
-                returnBlood(inventory, count);
-                break;
-            case 5:
                 printf("Exiting system...\n");
                 return 0;
             default:
